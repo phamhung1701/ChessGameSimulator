@@ -4,14 +4,9 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 
 public class Knight extends Piece {
-    //Quân mã
+    // Quân mã
     public Knight(boolean isWhite) {
         super(isWhite);
-    }
-
-    @Override
-    public boolean canMove(Board board, Square start, Square end) {
-        return false;
     }
 
     @Override
@@ -25,7 +20,26 @@ public class Knight extends Piece {
     }
 
     @Override
-    public void name() {
-        System.out.println("Knight");
+    public String name() {
+        return "Knight";
+    }
+
+    @Override
+    public boolean canMove(Board board, Square start, Square end) {
+        // Không thể di chuyển vào các ô có quân cùng màu
+        if (end.getPiece() != null && end.getPiece().isWhite() == this.isWhite()) {
+            return false;
+        }
+
+        int currentRow = start.getRow();
+        int currentCol = start.getColumn();
+        int destRow = end.getRow();
+        int destCol = end.getColumn();
+
+        // Kiểm tra các bước di chuyển hợp lệ của quân mã
+        int rowDiff = Math.abs(destRow - currentRow);
+        int colDiff = Math.abs(destCol - currentCol);
+
+        return (rowDiff == 2 && colDiff == 1) || (rowDiff == 1 && colDiff == 2);
     }
 }

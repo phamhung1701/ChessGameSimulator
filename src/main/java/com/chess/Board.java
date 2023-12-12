@@ -7,45 +7,60 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
 
 public class Board {
-    //Lớp bàn cờ
-    //Mảng 2D biểu diễn các ô trên bàn cờ
+    // Lớp bàn cờ
+    // Mảng 2D biểu diễn các ô trên bàn cờ
     Square[][] board = new Square[8][8]; //Cột trước, hàng sau
 
 
-    //Hàm dựng
+    // Hàm dựng
     public Board() {
         initializeChessboard();
     }
 
-    //Khởi tạo bàn cờ
+    // Khởi tạo bàn cờ
     public void initializeChessboard() {
-        //Khởi tạo các ô của bàn cờ
+        // Khởi tạo các ô của bàn cờ
         for (int i = 0; i < 8; i++) {
             for (int j = 0; j < 8; j++) {
                 board[i][j] = new Square(j, i, null); // Corrected indices
             }
         }
 
-        //Thêm vào bàn cờ các quân tốt
+        // Thêm vào bàn cờ các quân tốt
         for (int i = 0; i < 8; i++) {
             board[i][6].setPiece(new Pawn(true));
             board[i][1].setPiece(new Pawn(false));
         }
 
-        //Thêm vào bàn cờ các quân xe
+        // Thêm vào bàn cờ các quân xe
         board[0][7].setPiece(new Rook(true));
         board[0][0].setPiece(new Rook(false));
         board[7][0].setPiece(new Rook(false));
         board[7][7].setPiece(new Rook(true));
 
-        //Thêm vào bàn cờ các quân tượng
+        // Thêm vào bàn cờ các quân tượng
         board[2][7].setPiece(new Bishop(true));
         board[5][7].setPiece(new Bishop(true));
         board[2][0].setPiece(new Bishop(false));
         board[5][0].setPiece(new Bishop(false));
+
+        // Thêm vào bàn cờ các quân mã
+        board[1][7].setPiece(new Knight(true));
+        board[6][7].setPiece(new Knight(true));
+        board[1][0].setPiece(new Knight(false));
+        board[6][0].setPiece(new Knight(false));
+
+        // Thêm vào bàn cờ các quân hậu
+        board[3][7].setPiece(new Queen(true));
+        board[3][0].setPiece(new Queen(false));
+
+        // Thêm vào bàn cờ quân vua
+        board[4][7].setPiece(new King(true));
+        board[4][0].setPiece(new King(false));
+
     }
 
-    //Khởi tạo giao diện cho bàn cờ
+    // Khởi tạo giao diện cho bàn cờ
     public GridPane chessboard() {
         GridPane chessboard = new GridPane();
         for (int j = 0; j < 8; j++) {
@@ -69,9 +84,9 @@ public class Board {
         return chessboard;
     }
 
-    //Đặt lại giao diện của bàn cờ
+    // Đặt lại giao diện của bàn cờ
     void resetGUI(GridPane sourceBoard) {
-        sourceBoard.getChildren().clear(); // Clear existing children from the sourceBoard
+        sourceBoard.getChildren().clear();
         for (int i = 0; i < 8; i++) {
             for (int j = 0; j < 8; j++) {
                 sourceBoard.add(board[i][j].getRectangle(), i, j);
@@ -93,7 +108,7 @@ public class Board {
         }
     }
 
-    //Getter
+    // Getter
     public Square getSquare(int x, int y) {
         return board[x][y];
     }

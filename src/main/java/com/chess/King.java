@@ -4,14 +4,9 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 
 public class King extends Piece {
-    //Quân vua
+    // Quân Vua
     public King(boolean isWhite) {
         super(isWhite);
-    }
-
-    @Override
-    public boolean canMove(Board board, Square start, Square end) {
-        return false;
     }
 
     @Override
@@ -25,7 +20,23 @@ public class King extends Piece {
     }
 
     @Override
-    public void name() {
-        System.out.println("King");
+    public String name() {
+        return "King";
+    }
+
+    @Override
+    public boolean canMove(Board board, Square start, Square end) {
+        // Không thể di chuyển vào các ô có quân cùng màu
+        if (end.getPiece() != null && end.getPiece().isWhite() == this.isWhite()) {
+            return false;
+        }
+
+        int currentRow = start.getRow();
+        int currentCol = start.getColumn();
+        int destRow = end.getRow();
+        int destCol = end.getColumn();
+
+        // Di chuyển một ô theo chiều ngang hoặc dọc
+        return Math.abs(destRow - currentRow) <= 1 && Math.abs(destCol - currentCol) <= 1;
     }
 }

@@ -16,8 +16,8 @@ public class Pawn extends Piece {
     }
 
     @Override
-    public void name() {
-        System.out.println("Pawn");
+    public String name() {
+        return "Pawn";
     }
 
     public Pawn(boolean isWhite) {

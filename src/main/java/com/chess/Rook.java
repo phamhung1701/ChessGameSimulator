@@ -20,8 +20,8 @@ public class Rook extends Piece {
     }
 
     @Override
-    public void name() {
-        System.out.println("Rook");
+    public String name() {
+        return "Rook";
     }
 
     @Override

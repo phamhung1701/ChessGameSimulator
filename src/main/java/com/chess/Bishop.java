@@ -20,8 +20,8 @@ public class Bishop extends Piece {
     }
 
     @Override
-    public void name() {
-        System.out.println("Bishop");
+    public String name() {
+        return "Bishop";
     }
 
     @Override

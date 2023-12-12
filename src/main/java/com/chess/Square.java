@@ -4,34 +4,35 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 
 public class Square {
-    //Lớp biểu diễn tọa độ của quân cờ (ô)
-    private int row; //Hàng ngang
-    private int column; //Hàng dọc
-    private Rectangle rectangle; //Chủ yếu biểu diễn màu của một ô
-    private Piece piece; //Quân cờ ở trên ô hiện tại
+    // Lớp biểu diễn tọa độ của quân cờ (ô)
+    private int row; // Hàng ngang
+    private int column; // Hàng dọc
+    private Rectangle rectangle; // Chủ yếu biểu diễn màu của một ô
+    private Piece piece; // Quân cờ ở trên ô hiện tại
 
-    //Hàm dựng
+    // Hàm dựng
     public Square(int row, int column, Piece piece) {
         this.row = row;
         this.column = column;
         this.piece = piece;
         this.rectangle = new Rectangle(50 , 50);
 
-        //Đặt các màu mặc định cho các ô
-        if ((row + column) % 2 == 0) {
-            rectangle.setFill(Color.BEIGE);
-        } else {
-            rectangle.setFill(Color.GRAY);
-        }
+        // Đặt các màu mặc định cho các ô
+        clearHighlight();
     }
 
-    //Di chuyển quân cờ ở ô hiện tại đến ô destination
-    public void movePieceTo(Square destination) {
+    // Di chuyển quân cờ ở ô hiện tại đến ô destination và trả về quân cờ đã bị ăn
+    public Piece movePieceTo(Square destination) {
+        Piece capturedPiece = null;
+        if (destination.getPiece() != null) {
+            capturedPiece = destination.getPiece();
+        }
         destination.setPiece(this.piece);
         this.setPiece(null);
+        return capturedPiece;
     }
 
-    //Getter & Setter
+    // Getter & Setter
     public int getRow() {
         return row;
     }
@@ -64,18 +65,22 @@ public class Square {
         this.piece = piece;
     }
 
-    //Hiển thị ô hiện tại thành màu xanh nhạt
+    // Hiển thị các nước đi có thể đi được của quân được chọn
     public void highlight() {
-        rectangle.setFill(Color.LIGHTGREEN);
+        if (this.piece == null) {
+            rectangle.setFill(Color.LIGHTGREEN);
+        } else {
+            rectangle.setFill(Color.RED);
+        }
     }
 
-    //Hiển thị ô hiện tại thành màu vàng nhạt
+    // Hiển thị ô hiện tại thành màu vàng nhạt
     public void highlightSelectedPiece() {
-        rectangle.setFill(Color.LIGHTYELLOW);
+        rectangle.setFill(Color.YELLOW);
     }
 
 
-    //Đặt lại màu của ô
+    // Đặt lại màu của ô
     public void clearHighlight() {
         if ((row + column) % 2 == 0) {
             rectangle.setFill(Color.BEIGE);

@@ -26,5 +26,5 @@ public abstract class Piece {
     public abstract ImageView image();
 
     //In ra tên của quân cờ
-    public abstract void name();
+    public abstract String name();
 }
