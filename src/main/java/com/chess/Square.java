@@ -1,5 +1,7 @@
 package com.chess;
 
+import com.chess.pieces.Pawn;
+import com.chess.pieces.Piece;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 
@@ -24,6 +26,7 @@ public class Square {
     // Di chuyển quân cờ ở ô hiện tại đến ô destination và trả về quân cờ đã bị ăn
     public Piece movePieceTo(Square destination) {
         Piece capturedPiece = null;
+
         if (destination.getPiece() != null) {
             capturedPiece = destination.getPiece();
         }
@@ -87,5 +90,21 @@ public class Square {
         } else {
             rectangle.setFill(Color.GRAY);
         }
+    }
+
+    public boolean isEnPassantMove(Square destination) {
+        int destRow = destination.getRow();
+        int destColumn = destination.getColumn();
+        int direction = piece.isWhite() ? 1 : -1;
+        return this.row - direction == destRow
+                && (this.column + 1 == destColumn || this.column - 1 == destColumn);
+    }
+
+    @Override
+    public String toString() {
+        return "Square{" +
+                "row=" + row +
+                ", column=" + column +
+                '}';
     }
 }

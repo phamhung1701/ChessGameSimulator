@@ -1,48 +1,54 @@
 package com.chess;
 
+import com.chess.movement.*;
+import com.chess.pieces.King;
+import com.chess.pieces.Pawn;
+import com.chess.pieces.Piece;
+import com.chess.pieces.Rook;
 import javafx.application.Application;
+import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
-
-import java.util.Stack;
 
 
 public class ChessApp extends Application {
-    //Tạo bàn cờ và giao diện sử dụng GridPane
+    // Tạo bàn cờ và giao diện sử dụng GridPane
     Board board = new Board();
     GridPane chessboard = board.chessboard();
-
-    //Dùng Stack để lưu trữ các nước đi
-    Stack<Move> history = new Stack<>();
-
-    //Ô đang được chọn
+    // Ô đang được chọn
     private Square currentSquare = null;
 
-    //Ô đã chọn trước đó
+    // Ô đã chọn trước đó
     private Square previousSquare = null;
 
-    //Lượt đi
+    // Lượt đi
     private boolean whiteTurn = true;
+
+    // Tình trạng
+    GameStatus status = new GameStatus(board);
 
 
     public void start(Stage stage) throws Exception {
         chessboard.setOnMouseClicked(this::handleMouseClick);
 
         // Create the undo button
-//        Button undoButton = new Button("Undo");
-//        undoButton.setOnAction(event -> undoMove());
+        Button undoButton = new Button("Undo");
+        undoButton.setOnAction(event -> undoMove());
 
-        // Create a BorderPane and add the chessboard and the undo button
-//        BorderPane borderPane = new BorderPane();
-//        borderPane.setCenter(chessboard);
-//        borderPane.setBottom(undoButton);
+        // Wrap the undo button in an HBox with padding
+        HBox undoButtonWrapper = new HBox(undoButton);
+        undoButtonWrapper.setPadding(new Insets(10, 10, 10, 10)); // Adjust the padding as needed
+
+        // Create a VBox to hold the chessboard and the undo button
+        VBox mainLayout = new VBox(chessboard, undoButtonWrapper);
 
 
-        Scene scene = new Scene(chessboard, 400, 400);
+        Scene scene = new Scene(mainLayout, 400, 450);
         stage.setTitle("Chess Game");
         stage.setScene(scene);
         stage.show();
@@ -52,60 +58,154 @@ public class ChessApp extends Application {
         launch(args);
     }
 
-    //Xử lý đầu vào dùng chuột
+    // Xử lý đầu vào dùng chuột
     public void handleMouseClick(MouseEvent event) {
-        //Xác định tọa độ chuột click vào
-        int row = (int) (event.getX() / 50);
-        int column = (int) (event.getY() / 50);
+        // Adjust for the resolution and button offset
+        double xOffset = (chessboard.getWidth() - chessboard.getBoundsInLocal().getWidth()) / 2;
+        double yOffset = (chessboard.getHeight() - chessboard.getBoundsInLocal().getHeight()) / 2;
 
-        handleMove(row, column);
+        // Check if the click is within the chessboard area
+        if (event.getX() >= xOffset && event.getY() >= yOffset) {
+            // Your existing logic for handling mouse clicks
+            int row = (int) ((event.getX() - xOffset) / 50);
+            int column = (int) ((event.getY() - yOffset) / 50);
+            handleMove(row, column);
+        }
     }
 
-    //Xử lý các bước đi
+    // Xử lý các bước đi
     public void handleMove(int row, int column) {
         //Xác định ô được chọn và ô đã chọn trước đó
         previousSquare = currentSquare;
         currentSquare = this.board.getSquare(row, column);
 
-        //Remove previous highlights
         if (previousSquare != null) {
             previousSquare.clearHighlight();
         }
 
-        //Kiểm tra nếu quân tốt được phong cấp hay không
+        // Kiểm tra trường hợp đặc biệt của quân tốt
         if (currentSquare.getPiece() instanceof Pawn) {
+            // En passant bên trái
+            if (board.getLeftSquare(currentSquare) != null
+                && board.getLeftSquare(currentSquare).getPiece() instanceof Pawn
+                && board.getLeftSquare(currentSquare).getPiece().isWhite() != currentSquare.getPiece().isWhite()
+                    && ((currentSquare.getRow() == 3 && currentSquare.getPiece().isWhite())
+                    || (currentSquare.getRow() == 4 && !currentSquare.getPiece().isWhite()))) {
+                ((Pawn) currentSquare.getPiece()).setEnPassantPossibleLeft(true);
+                PawnMove enPassant = new PawnMove(board.pop());
+                enPassant.setEnPassantPossible(true);
+                board.push(enPassant);
+            } else {
+                ((Pawn) currentSquare.getPiece()).setEnPassantPossibleLeft(false);
+            }
+
+            // En passant bên phải
+            if (board.getRightSquare(currentSquare) != null
+                    && board.getRightSquare(currentSquare).getPiece() instanceof Pawn
+                    && board.getRightSquare(currentSquare).getPiece().isWhite() != currentSquare.getPiece().isWhite()
+                    && ((currentSquare.getRow() == 3 && currentSquare.getPiece().isWhite())
+                    || (currentSquare.getRow() == 4 && !currentSquare.getPiece().isWhite()))) {
+                ((Pawn) currentSquare.getPiece()).setEnPassantPossibleRight(true);
+                PawnMove enPassant = new PawnMove(board.pop());
+                enPassant.setEnPassantPossible(true);
+                board.push(enPassant);
+            } else {
+                ((Pawn) currentSquare.getPiece()).setEnPassantPossibleRight(false);
+            }
+
+            // Phong cấp
             if (((Pawn) currentSquare.getPiece()).canBePromote(currentSquare)) {
                 currentSquare.setPiece(new Rook(currentSquare.getPiece().isWhite()));
                 board.resetGUI(chessboard);
             }
         }
 
-        //Hiển thị các nước đi hợp lệ cho quân cờ được chọn
+        // Hiển thị các nước đi hợp lệ cho quân cờ được chọn
         highlightValidMoves(currentSquare);
 
-        System.out.println("row :" + currentSquare.getRow() + ", column :" + currentSquare.getColumn());
-
-        //Thực hiện di chuyển các quân cờ
+        // Thực hiện di chuyển các quân cờ
         if (previousSquare != null
-                && previousSquare.getPiece() != null
-                && previousSquare != currentSquare
-                && previousSquare.getPiece().canMove(board, previousSquare, currentSquare)
-                && ((whiteTurn && previousSquare.getPiece().isWhite())
-                    || (!whiteTurn && !previousSquare.getPiece().isWhite()))) {
+            && previousSquare.getPiece() != null
+            && previousSquare != currentSquare
+            && previousSquare.getPiece().canMove(board, previousSquare, currentSquare)
+            && ((whiteTurn && previousSquare.getPiece().isWhite())
+                || (!whiteTurn && !previousSquare.getPiece().isWhite()))) {
 
-            //Di chuyển quân cờ và lưu lại nước đi
+            //Kiểm tra nếu vua đã di chuyển
+            if (previousSquare.getPiece() instanceof King) {
+                ((King) previousSquare.getPiece()).moved();
+            }
+
+            //Kiểm tra nếu nước đi là en passant
+            boolean isEnPassantMove = false;
+            boolean leftEnPassant = false;
+            if (previousSquare.getPiece() instanceof Pawn
+                && board.isEnPassantMove(previousSquare, currentSquare)) {
+                isEnPassantMove = true;
+                if (((Pawn) previousSquare.getPiece()).isEnPassantPossibleLeft()) {
+                    leftEnPassant = true;
+                    board.getLeftSquare(previousSquare).setPiece(null);
+                } else if (((Pawn) previousSquare.getPiece()).isEnPassantPossibleRight()){
+                    board.getRightSquare(previousSquare).setPiece(null);
+                }
+            }
+
+            //Kiểm tra nếu nước đi là nước nhập thành
+            boolean isCastlingMove = false;
+
+            if (previousSquare.getPiece() instanceof King
+                    && Math.abs(currentSquare.getColumn() - previousSquare.getColumn()) == 2) {
+                isCastlingMove = true;
+                //King side
+                if (currentSquare.getColumn() > previousSquare.getColumn()) {
+                    Square destination = board.getSquare(5, currentSquare.getRow());
+                    board.getSquare(7, currentSquare.getRow()).movePieceTo(destination);
+                }
+                //Queen side
+                else if (currentSquare.getColumn() < previousSquare.getColumn()) {
+                    Square destination = board.getSquare(3, currentSquare.getRow());
+                    board.getSquare(0, currentSquare.getRow()).movePieceTo(destination);
+                }
+            }
+
+            // Di chuyển quân cờ và lưu lại nước đi
             Piece capturedPiece = previousSquare.movePieceTo(currentSquare);
-            Move move = new Move(previousSquare, currentSquare, previousSquare.getPiece(), capturedPiece);
-            history.push(move);
 
-            //Đặt lại giá trị cho các biến
+
+            if (isEnPassantMove) {
+                PawnMove move = new PawnMove(previousSquare, currentSquare, previousSquare.getPiece(), capturedPiece);
+                move.setEnPassantMove(isEnPassantMove);
+                move.setLeftEnPassant(leftEnPassant);
+                board.push(move);
+            } else if (isCastlingMove) {
+                KingMove move = new KingMove(previousSquare, currentSquare, previousSquare.getPiece(), capturedPiece);
+                move.setCastlingMove(isCastlingMove);
+                board.push(move);
+            } else {
+                Move move = new Move(previousSquare, currentSquare, previousSquare.getPiece(), capturedPiece);
+                board.push(move);
+            }
+
+            // Kiểm tra nếu sau nước đi tướng vẫn bị chiếu
+            if (status.isCheck(!whiteTurn)) {
+                System.out.println("Invalid move");
+                undoMove();
+            }
+
+            // Kiểm tra nếu đã chiếu hết
+            if (status.isCheck(!whiteTurn) &&
+                status.isCheckmate(!whiteTurn)) {
+                String side = whiteTurn ? "White" : "Black";
+                System.out.println(side + " win!");
+            }
+
+            // Đặt lại giá trị cho các biến
             previousSquare = null;
-            currentSquare = null;
 
-            //Đổi lượt
+            // Đổi lượt
             whiteTurn = !whiteTurn;
 
-            //Đặt lại giao diện cho bàn cờ
+            // Đặt lại giao diện cho bàn cờ
             board.resetGUI(chessboard);
         }
     }
@@ -120,7 +220,8 @@ public class ChessApp extends Application {
                 Square end = board.getSquare(i, j);
                 if (currentSquare != null && currentSquare.getPiece() != null
                         && currentSquare.getPiece().canMove(board, start, end)
-                        && currentSquare.getPiece().isWhite() == this.whiteTurn) {
+                        && currentSquare.getPiece().isWhite() == this.whiteTurn
+                        && status.isMoveValidWithoutCheck(start, end, whiteTurn)) {
                     // Đổi màu của các ô được đánh dấu bằng màu xanh nhạt
                     end.highlight();
                 }
@@ -137,15 +238,53 @@ public class ChessApp extends Application {
 
     //Hoàn tác lại nước đi
     public void undoMove() {
-        if (!history.isEmpty()) {
-            Move lastMove = history.pop();
+        if (!board.getHistory().isEmpty()) {
+            this.whiteTurn = !this.whiteTurn;
+            Move lastMove = board.pop();
+
+            //Xử lý nếu hoàn tác nước đi của vua
+            if (lastMove instanceof KingMove
+                    && lastMove.getEnd().getPiece() instanceof King) {
+                ((King) lastMove.getEnd().getPiece()).undo();
+            }
+
             lastMove.getEnd().movePieceTo(lastMove.getStart());
             if (lastMove.getCapturedPiece() != null) {
                 lastMove.getEnd().setPiece(lastMove.getCapturedPiece());
+            }
+
+            //Xử lý nếu hoàn tác nước đi en passant
+            if (lastMove instanceof PawnMove) {
+                if (((PawnMove) lastMove).isEnPassantMove()) {
+                    if (((PawnMove) lastMove).isLeftEnPassant()) {
+                        board.getLeftSquare(lastMove.getStart()).setPiece(new Pawn(!whiteTurn));
+                    } else {
+                        board.getRightSquare(lastMove.getStart()).setPiece(new Pawn(!whiteTurn));
+                    }
+                }
+            }
+
+            // Xử lý nếu hoàn tác nước đi nhập thành
+            if (lastMove instanceof KingMove) {
+                if (((KingMove) lastMove).isCastlingMove()) {
+                    int row = lastMove.getEnd().getRow();
+                    int kingStartCol = lastMove.getEnd().getColumn();
+                    int kingEndCol = lastMove.getStart().getColumn();
+
+                    // King side
+                    if (kingEndCol < kingStartCol) {
+                        Square rookSquare = board.getSquare(kingStartCol - 1, row);
+                        rookSquare.movePieceTo(board.getSquare(7, row));
+                    }
+                    // Queen side
+                    else if (kingEndCol > kingStartCol) {
+                        Square rookSquare = board.getSquare(kingStartCol + 1, row);
+                        rookSquare.movePieceTo(board.getSquare(0, row));
+                    }
+                }
             }
             // Cập nhật giao diện
             board.resetGUI(chessboard);
         }
     }
-
 }

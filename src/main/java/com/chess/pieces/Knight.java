@@ -1,17 +1,19 @@
-package com.chess;
+package com.chess.pieces;
 
+import com.chess.Board;
+import com.chess.Square;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 
-public class King extends Piece {
-    // Quân Vua
-    public King(boolean isWhite) {
+public class Knight extends Piece {
+    // Quân mã
+    public Knight(boolean isWhite) {
         super(isWhite);
     }
 
     @Override
     public ImageView image() {
-        String imagePath = this.isWhite() ? "king_white.png" : "king_black.png";
+        String imagePath = this.isWhite() ? "knight_white.png" : "knight_black.png";
         ImageView image = new ImageView(new Image(imagePath));
         double size = 30;
         image.setFitWidth(size);
@@ -21,7 +23,7 @@ public class King extends Piece {
 
     @Override
     public String name() {
-        return "King";
+        return "Knight";
     }
 
     @Override
@@ -36,7 +38,10 @@ public class King extends Piece {
         int destRow = end.getRow();
         int destCol = end.getColumn();
 
-        // Di chuyển một ô theo chiều ngang hoặc dọc
-        return Math.abs(destRow - currentRow) <= 1 && Math.abs(destCol - currentCol) <= 1;
+        // Kiểm tra các bước di chuyển hợp lệ của quân mã
+        int rowDiff = Math.abs(destRow - currentRow);
+        int colDiff = Math.abs(destCol - currentCol);
+
+        return (rowDiff == 2 && colDiff == 1) || (rowDiff == 1 && colDiff == 2);
     }
 }

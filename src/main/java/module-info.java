@@ -5,4 +5,8 @@ module com.example.demo7 {
 
     opens com.chess to javafx.fxml;
     exports com.chess;
+    exports com.chess.pieces;
+    opens com.chess.pieces to javafx.fxml;
+    exports com.chess.movement;
+    opens com.chess.movement to javafx.fxml;
 }

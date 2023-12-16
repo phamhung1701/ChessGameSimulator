@@ -1,12 +1,17 @@
-package com.chess;
+package com.chess.pieces;
 
+import com.chess.Board;
+import com.chess.Square;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 
 public class Rook extends Piece {
     //Quân xe
+
+    private boolean hasMoved;
     public Rook(boolean isWhite) {
         super(isWhite);
+        this.hasMoved = false;
     }
 
     @Override
@@ -31,12 +36,10 @@ public class Rook extends Piece {
             return false;
         }
 
-
         int currentRow = start.getRow();
         int currentCol = start.getColumn();
         int destRow = end.getRow();
         int destCol = end.getColumn();
-
 
         if (currentRow == destRow) {
             //Di chuyển theo chiều ngang
@@ -72,5 +75,13 @@ public class Rook extends Piece {
             return true;
         }
         return false;
+    }
+
+    public boolean hasMoved() {
+        return hasMoved;
+    }
+
+    public void setHasMoved(boolean hasMoved) {
+        this.hasMoved = hasMoved;
     }
 }

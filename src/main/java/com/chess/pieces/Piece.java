@@ -1,5 +1,7 @@
-package com.chess;
+package com.chess.pieces;
 
+import com.chess.Board;
+import com.chess.Square;
 import javafx.scene.image.ImageView;
 
 public abstract class Piece {

@@ -1,4 +1,7 @@
-package com.chess;
+package com.chess.movement;
+
+import com.chess.Square;
+import com.chess.pieces.Piece;
 
 public class Move {
     private Square start;
@@ -43,10 +46,5 @@ public class Move {
 
     public void setCapturedPiece(Piece capturedPiece) {
         this.capturedPiece = capturedPiece;
-    }
-
-    public void describeMove() {
-        String capturedPiece = getCapturedPiece() != null ? getCapturedPiece().name() : "none";
-        System.out.println();
     }
 }

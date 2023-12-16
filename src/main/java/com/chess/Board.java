@@ -1,17 +1,22 @@
 package com.chess;
 
+import com.chess.movement.Move;
+import com.chess.pieces.*;
 import javafx.geometry.HPos;
 import javafx.geometry.Pos;
 import javafx.geometry.VPos;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
 
+import java.util.Stack;
+
 public class Board {
     // Lớp bàn cờ
     // Mảng 2D biểu diễn các ô trên bàn cờ
     Square[][] board = new Square[8][8]; //Cột trước, hàng sau
 
-
+    // Dùng Stack để lưu trữ các nước đi
+    Stack<Move> history = new Stack<>();
     // Hàm dựng
     public Board() {
         initializeChessboard();
@@ -111,5 +116,76 @@ public class Board {
     // Getter
     public Square getSquare(int x, int y) {
         return board[x][y];
+    }
+
+    public Stack<Move> getHistory() {
+        return history;
+    }
+
+    // Push & Pop các nước đi
+    public void push(Move move) {
+        history.push(move);
+    }
+
+    public Move pop() {
+        return history.pop();
+    }
+
+    public Move getLastMove() {
+        return history.peek();
+    }
+
+    public Square getLeftSquare(Square currentSquare) {
+        if (currentSquare.getColumn() == 0) {
+            return null;
+        }
+        int leftCol = currentSquare.getColumn() - 1;
+        int row = currentSquare.getRow();
+
+        return getSquare(leftCol, row);
+    }
+
+    public Square getRightSquare(Square currentSquare) {
+        if (currentSquare.getColumn() == 7) {
+            return null;
+        }
+        int rightCol = currentSquare.getColumn() + 1;
+        int row = currentSquare.getRow();
+
+        return getSquare(rightCol, row);
+    }
+
+    protected boolean isLeftDiagonal(Square start, Square end) {
+        if (start.getColumn() == 0
+                || start.getRow() == 0
+                || start.getRow() == 7) {
+            return false;
+        }
+        int direction = start.getPiece().isWhite() ? 1 : -1;
+        return start.getRow() - direction == end.getRow()
+                && start.getColumn() - 1 == end.getColumn();
+    }
+
+    protected boolean isRightDiagonal(Square start, Square end) {
+        if (start.getColumn() == 7
+                || start.getRow() == 0
+                || start.getRow() == 7) {
+            return false;
+        }
+        int direction = start.getPiece().isWhite() ? 1 : -1;
+        return start.getRow() - direction == end.getRow()
+                && start.getColumn() + 1 == end.getColumn();
+    }
+
+    public boolean isEnPassantMove(Square start, Square end) {
+        if (start.getPiece() instanceof Pawn
+                && end.getPiece() == null
+                && ((start.getRow() == 3 && start.getPiece().isWhite())
+                    || (start.getRow() == 4 && !start.getPiece().isWhite()))
+                && ((isLeftDiagonal(start, end) && getLeftSquare(start).getPiece() instanceof Pawn)
+                    || (isRightDiagonal(start, end) && getRightSquare(start).getPiece() instanceof Pawn))) {
+            return true;
+        }
+        return false;
     }
 }
