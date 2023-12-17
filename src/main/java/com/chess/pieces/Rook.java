@@ -90,4 +90,9 @@ public class Rook extends Piece {
     public void undo() {
         timesMoved--;
     }
+
+    @Override
+    public char getSymbol() {
+        return 'R';
+    }
 }

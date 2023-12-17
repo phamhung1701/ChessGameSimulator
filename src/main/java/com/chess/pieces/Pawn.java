@@ -32,6 +32,11 @@ public class Pawn extends Piece {
     }
 
     @Override
+    public char getSymbol() {
+        return 'P';
+    }
+
+    @Override
     public boolean canMove(Board board, Square start, Square end) {
         //Không thể di chuyển vào các ô có quân cùng màu
         if (end.getPiece() != null && end.getPiece().isWhite() == this.isWhite()) {

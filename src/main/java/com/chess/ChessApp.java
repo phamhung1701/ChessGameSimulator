@@ -1,14 +1,12 @@
 package com.chess;
 
 import com.chess.movement.*;
-import com.chess.pieces.King;
-import com.chess.pieces.Pawn;
-import com.chess.pieces.Piece;
-import com.chess.pieces.Rook;
+import com.chess.pieces.*;
 import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
@@ -34,15 +32,17 @@ public class ChessApp extends Application {
     // Tình trạng
     GameStatus status = new GameStatus(board);
 
+    private final String saveFilePath = "chess_save.txt";
+
+    private Label checkmateLabel = new Label("");
 
     public void start(Stage stage) throws Exception {
         chessboard.setOnMouseClicked(this::handleMouseClick);
-
-        String filePath = "saved_game.ser";
+        checkmateLabel.setStyle("-fx-font-size: 18; -fx-font-weight: bold;");
 
         // Create the save and load buttons
-        Button saveButton = createSaveGameButton(filePath);
-        Button loadButton = createLoadGameButton(filePath);
+        Button saveButton = createSaveGameButton();
+        Button loadButton = createLoadGameButton();
 
         // Create the undo button
         Button undoButton = new Button("Undo");
@@ -53,16 +53,20 @@ public class ChessApp extends Application {
 
 
         // Wrap the undo button in an HBox with padding
-        HBox ButtonWrapper = new HBox(saveButton, loadButton, undoButton, newGameButton);
+        HBox ButtonWrapper = new HBox(newGameButton, saveButton, loadButton, undoButton);
         ButtonWrapper.setPadding(new Insets(10, 10, 10, 10));
-        ButtonWrapper.setSpacing(20);
+        ButtonWrapper.setSpacing(35);
+
+        VBox infoLayout = new VBox(checkmateLabel);
+        infoLayout.setPadding(new Insets(10, 10, 10, 10));
+        infoLayout.setSpacing(20);
 
         // Create a VBox to hold the chessboard and the undo button
-        VBox mainLayout = new VBox(chessboard, ButtonWrapper);
+        VBox mainLayout = new VBox(infoLayout, chessboard, ButtonWrapper);
 
 
-        Scene scene = new Scene(mainLayout, 400, 450);
-        stage.setTitle("Chess Game");
+        Scene scene = new Scene(mainLayout, 400, 500);
+        stage.setTitle("Chess");
         stage.setScene(scene);
         stage.show();
     }
@@ -205,16 +209,16 @@ public class ChessApp extends Application {
             }
 
             // Kiểm tra nếu sau nước đi tướng vẫn bị chiếu
-            if (status.isCheck(!whiteTurn)) {
+            if (status.isCheck(whiteTurn)) {
                 System.out.println("Invalid move");
                 undoMove();
             }
 
             // Kiểm tra nếu đã chiếu hết
-            if (status.isCheck(!whiteTurn) &&
-                status.isCheckmate(!whiteTurn)) {
+            if (status.isCheckmate(!whiteTurn)) {
+                System.out.println("Is checkMate");
                 String side = whiteTurn ? "White" : "Black";
-                System.out.println(side + " win!");
+                checkmateLabel.setText(side + " win!");
             }
 
             // Đặt lại giá trị cho các biến
@@ -326,37 +330,87 @@ public class ChessApp extends Application {
         board.resetGUI(chessboard);
     }
 
-    public void saveGame(String filePath) {
-        try (ObjectOutputStream outputStream = new ObjectOutputStream(new FileOutputStream(filePath))) {
-            outputStream.writeObject(board);
-            // Add more data if needed
+    public void saveGame() {
+        try (PrintWriter writer = new PrintWriter(new FileWriter(saveFilePath))) {
+            saveBoardState(writer);
+            writer.println(whiteTurn ? "WHITE" : "BLACK");
+            System.out.println("Game saved successfully.");
         } catch (IOException e) {
-            e.printStackTrace();
+            System.err.println("Error saving the game: " + e.getMessage());
         }
     }
 
-    // Load Game
-    public void loadGame(String filePath) {
-        try (ObjectInputStream inputStream = new ObjectInputStream(new FileInputStream(filePath))) {
-            board = (Board) inputStream.readObject();
+    private void saveBoardState(PrintWriter writer) {
+        for (int i = 0; i < 8; i++) {
+            for (int j = 0; j < 8; j++) {
+                Square square = board.getSquare(i, j);
+                Piece piece = square.getPiece();
+                char pieceSymbol = '-';
+                if (piece != null) {
+                    pieceSymbol = (piece.isWhite())
+                            ? piece.getSymbol() : Character.toLowerCase(piece.getSymbol());
+                }
+                writer.print(pieceSymbol);
+            }
+            writer.println();
+        }
+    }
+
+    public void loadGame() {
+        try (BufferedReader reader = new BufferedReader(new FileReader(saveFilePath))) {
+            loadBoardState(reader);
+            String turn = reader.readLine();
+            whiteTurn = "WHITE".equals(turn);
             board.resetGUI(chessboard);
-        } catch (IOException | ClassNotFoundException e) {
-            e.printStackTrace();
+            currentSquare = null;
+            previousSquare = null;
+            System.out.println("Game loaded successfully.");
+        } catch (IOException e) {
+            System.err.println("Error loading the game: " + e.getMessage());
         }
     }
 
-    // Save Game Button
-    public Button createSaveGameButton(String filePath) {
+    private void loadBoardState(BufferedReader reader) throws IOException {
+        for (int i = 0; i < 8; i++) {
+            String line = reader.readLine();
+            for (int j = 0; j < 8; j++) {
+                char symbol = line.charAt(j);
+                Piece piece = createPiece(symbol);
+                board.getSquare(i, j).setPiece(piece);
+            }
+        }
+    }
+
+    private Piece createPiece(char symbol) {
+        boolean isWhite = Character.isUpperCase(symbol);
+
+        switch (Character.toUpperCase(symbol)) {
+            case 'P':
+                return new Pawn(isWhite);
+            case 'R':
+                return new Rook(isWhite);
+            case 'N':
+                return new Knight(isWhite);
+            case 'B':
+                return new Bishop(isWhite);
+            case 'Q':
+                return new Queen(isWhite);
+            case 'K':
+                return new King(isWhite);
+            default:
+                return null;
+        }
+    }
+
+    public Button createSaveGameButton() {
         Button saveButton = new Button("Save Game");
-        saveButton.setOnAction(event -> saveGame(filePath));
+        saveButton.setOnAction(event -> saveGame());
         return saveButton;
     }
 
-    // Load Game Button
-    public Button createLoadGameButton(String filePath) {
+    public Button createLoadGameButton() {
         Button loadButton = new Button("Load Game");
-        loadButton.setOnAction(event -> loadGame(filePath));
+        loadButton.setOnAction(event -> loadGame());
         return loadButton;
     }
-
 }

@@ -93,4 +93,9 @@ public class Queen extends Piece {
 
         return false;
     }
+
+    @Override
+    public char getSymbol() {
+        return 'Q';
+    }
 }

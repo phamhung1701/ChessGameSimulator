@@ -29,4 +29,6 @@ public abstract class Piece {
 
     //In ra tên của quân cờ
     public abstract String name();
+
+    public abstract char getSymbol();
 }
