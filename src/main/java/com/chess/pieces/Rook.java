@@ -7,11 +7,9 @@ import javafx.scene.image.ImageView;
 
 public class Rook extends Piece {
     //Quân xe
-
-    private boolean hasMoved;
+    private int timesMoved;
     public Rook(boolean isWhite) {
         super(isWhite);
-        this.hasMoved = false;
     }
 
     @Override
@@ -77,11 +75,19 @@ public class Rook extends Piece {
         return false;
     }
 
-    public boolean hasMoved() {
-        return hasMoved;
+    public int getTimesMoved() {
+        return timesMoved;
     }
 
-    public void setHasMoved(boolean hasMoved) {
-        this.hasMoved = hasMoved;
+    public void setTimesMoved(int timesMoved) {
+        this.timesMoved = timesMoved;
+    }
+
+    public void moved() {
+        timesMoved++;
+    }
+
+    public void undo() {
+        timesMoved--;
     }
 }

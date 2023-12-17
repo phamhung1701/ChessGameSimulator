@@ -47,7 +47,7 @@ public class King extends Piece {
 
                 Square rookSquare = board.getSquare(7, currentRow);
                 if (rookSquare != null && rookSquare.getPiece() instanceof Rook
-                        && !((Rook) rookSquare.getPiece()).hasMoved()) {
+                        && ((Rook) rookSquare.getPiece()).getTimesMoved() == 0) {
 
                     // Check if the squares between the king and rook are empty
                     if (board.getSquare(currentCol + 1, currentRow).getPiece() == null
@@ -61,7 +61,7 @@ public class King extends Piece {
 
                 Square rookSquare = board.getSquare(0, currentRow);
                 if (rookSquare != null && rookSquare.getPiece() instanceof Rook
-                        && !((Rook) rookSquare.getPiece()).hasMoved()) {
+                        && ((Rook) rookSquare.getPiece()).getTimesMoved() == 0) {
 
                     // Check if the squares between the king and rook are empty
                     if (board.getSquare(currentCol - 1, currentRow).getPiece() == null

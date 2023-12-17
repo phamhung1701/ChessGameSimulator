@@ -27,7 +27,7 @@ public class Board {
         // Khởi tạo các ô của bàn cờ
         for (int i = 0; i < 8; i++) {
             for (int j = 0; j < 8; j++) {
-                board[i][j] = new Square(j, i, null); // Corrected indices
+                board[i][j] = new Square(j, i, null);
             }
         }
 
@@ -113,6 +113,48 @@ public class Board {
         }
     }
 
+    public void resetBoard() {
+        // Khởi tạo các ô của bàn cờ
+        for (int i = 0; i < 8; i++) {
+            for (int j = 0; j < 8; j++) {
+                board[i][j] = new Square(j, i, null); // Corrected indices
+            }
+        }
+
+        // Thêm vào bàn cờ các quân tốt
+        for (int i = 0; i < 8; i++) {
+            board[i][6].setPiece(new Pawn(true));
+            board[i][1].setPiece(new Pawn(false));
+        }
+
+        // Thêm vào bàn cờ các quân xe
+        board[0][7].setPiece(new Rook(true));
+        board[0][0].setPiece(new Rook(false));
+        board[7][0].setPiece(new Rook(false));
+        board[7][7].setPiece(new Rook(true));
+
+        // Thêm vào bàn cờ các quân tượng
+        board[2][7].setPiece(new Bishop(true));
+        board[5][7].setPiece(new Bishop(true));
+        board[2][0].setPiece(new Bishop(false));
+        board[5][0].setPiece(new Bishop(false));
+
+        // Thêm vào bàn cờ các quân mã
+        board[1][7].setPiece(new Knight(true));
+        board[6][7].setPiece(new Knight(true));
+        board[1][0].setPiece(new Knight(false));
+        board[6][0].setPiece(new Knight(false));
+
+        // Thêm vào bàn cờ các quân hậu
+        board[3][7].setPiece(new Queen(true));
+        board[3][0].setPiece(new Queen(false));
+
+        // Thêm vào bàn cờ quân vua
+        board[4][7].setPiece(new King(true));
+        board[4][0].setPiece(new King(false));
+
+    }
+
     // Getter
     public Square getSquare(int x, int y) {
         return board[x][y];
@@ -151,7 +193,6 @@ public class Board {
         }
         int rightCol = currentSquare.getColumn() + 1;
         int row = currentSquare.getRow();
-
         return getSquare(rightCol, row);
     }
 
@@ -187,5 +228,9 @@ public class Board {
             return true;
         }
         return false;
+    }
+
+    public void clearHistory() {
+        history.clear();
     }
 }

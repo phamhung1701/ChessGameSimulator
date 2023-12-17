@@ -15,6 +15,8 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
+import java.io.*;
+
 
 public class ChessApp extends Application {
     // Tạo bàn cờ và giao diện sử dụng GridPane
@@ -36,16 +38,27 @@ public class ChessApp extends Application {
     public void start(Stage stage) throws Exception {
         chessboard.setOnMouseClicked(this::handleMouseClick);
 
+        String filePath = "saved_game.ser";
+
+        // Create the save and load buttons
+        Button saveButton = createSaveGameButton(filePath);
+        Button loadButton = createLoadGameButton(filePath);
+
         // Create the undo button
         Button undoButton = new Button("Undo");
         undoButton.setOnAction(event -> undoMove());
 
+        Button newGameButton = new Button("New Game");
+        newGameButton.setOnAction(event -> startNewGame());
+
+
         // Wrap the undo button in an HBox with padding
-        HBox undoButtonWrapper = new HBox(undoButton);
-        undoButtonWrapper.setPadding(new Insets(10, 10, 10, 10)); // Adjust the padding as needed
+        HBox ButtonWrapper = new HBox(saveButton, loadButton, undoButton, newGameButton);
+        ButtonWrapper.setPadding(new Insets(10, 10, 10, 10));
+        ButtonWrapper.setSpacing(20);
 
         // Create a VBox to hold the chessboard and the undo button
-        VBox mainLayout = new VBox(chessboard, undoButtonWrapper);
+        VBox mainLayout = new VBox(chessboard, ButtonWrapper);
 
 
         Scene scene = new Scene(mainLayout, 400, 450);
@@ -134,6 +147,11 @@ public class ChessApp extends Application {
             //Kiểm tra nếu vua đã di chuyển
             if (previousSquare.getPiece() instanceof King) {
                 ((King) previousSquare.getPiece()).moved();
+            }
+
+            //Kiểm tra nếu xe đã di chuyển
+            if (previousSquare.getPiece() instanceof Rook) {
+                ((Rook) previousSquare.getPiece()).moved();
             }
 
             //Kiểm tra nếu nước đi là en passant
@@ -248,6 +266,11 @@ public class ChessApp extends Application {
                 ((King) lastMove.getEnd().getPiece()).undo();
             }
 
+            //Xử lý nếu hoàn tác nước đi của xe
+            if (lastMove.getEnd().getPiece() instanceof Rook) {
+                ((Rook) lastMove.getEnd().getPiece()).undo();
+            }
+
             lastMove.getEnd().movePieceTo(lastMove.getStart());
             if (lastMove.getCapturedPiece() != null) {
                 lastMove.getEnd().setPiece(lastMove.getCapturedPiece());
@@ -287,4 +310,53 @@ public class ChessApp extends Application {
             board.resetGUI(chessboard);
         }
     }
+
+    public void startNewGame() {
+        // Reset the board
+        board.resetBoard();
+
+        // Clear move history
+        board.clearHistory();
+
+        // Set initial game state
+        whiteTurn = true;
+        status = new GameStatus(board);
+
+        // Update the GUI
+        board.resetGUI(chessboard);
+    }
+
+    public void saveGame(String filePath) {
+        try (ObjectOutputStream outputStream = new ObjectOutputStream(new FileOutputStream(filePath))) {
+            outputStream.writeObject(board);
+            // Add more data if needed
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    // Load Game
+    public void loadGame(String filePath) {
+        try (ObjectInputStream inputStream = new ObjectInputStream(new FileInputStream(filePath))) {
+            board = (Board) inputStream.readObject();
+            board.resetGUI(chessboard);
+        } catch (IOException | ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+    }
+
+    // Save Game Button
+    public Button createSaveGameButton(String filePath) {
+        Button saveButton = new Button("Save Game");
+        saveButton.setOnAction(event -> saveGame(filePath));
+        return saveButton;
+    }
+
+    // Load Game Button
+    public Button createLoadGameButton(String filePath) {
+        Button loadButton = new Button("Load Game");
+        loadButton.setOnAction(event -> loadGame(filePath));
+        return loadButton;
+    }
+
 }
