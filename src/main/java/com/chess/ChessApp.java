@@ -6,6 +6,7 @@ import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.ChoiceDialog;
 import javafx.scene.control.Label;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
@@ -129,12 +130,6 @@ public class ChessApp extends Application {
             } else {
                 ((Pawn) currentSquare.getPiece()).setEnPassantPossibleRight(false);
             }
-
-            // Phong cấp
-            if (((Pawn) currentSquare.getPiece()).canBePromote(currentSquare)) {
-                currentSquare.setPiece(new Rook(currentSquare.getPiece().isWhite()));
-                board.resetGUI(chessboard);
-            }
         }
 
         // Hiển thị các nước đi hợp lệ cho quân cờ được chọn
@@ -147,6 +142,10 @@ public class ChessApp extends Application {
             && previousSquare.getPiece().canMove(board, previousSquare, currentSquare)
             && ((whiteTurn && previousSquare.getPiece().isWhite())
                 || (!whiteTurn && !previousSquare.getPiece().isWhite()))) {
+
+            checkmateLabel.setText("");
+
+
 
             //Kiểm tra nếu vua đã di chuyển
             if (previousSquare.getPiece() instanceof King) {
@@ -193,6 +192,13 @@ public class ChessApp extends Application {
             // Di chuyển quân cờ và lưu lại nước đi
             Piece capturedPiece = previousSquare.movePieceTo(currentSquare);
 
+            boolean isPromotionMove = false;
+            // Phong cấp
+            if (currentSquare.getPiece() instanceof Pawn &&
+                    ((Pawn) currentSquare.getPiece()).canBePromote(currentSquare)) {
+                showPromotionDialog();
+                isPromotionMove = true;
+            }
 
             if (isEnPassantMove) {
                 PawnMove move = new PawnMove(previousSquare, currentSquare, previousSquare.getPiece(), capturedPiece);
@@ -203,6 +209,10 @@ public class ChessApp extends Application {
                 KingMove move = new KingMove(previousSquare, currentSquare, previousSquare.getPiece(), capturedPiece);
                 move.setCastlingMove(isCastlingMove);
                 board.push(move);
+            } else if (isPromotionMove) {
+                PawnMove move = new PawnMove(previousSquare, currentSquare, previousSquare.getPiece(), capturedPiece);
+                move.setPromotionMove(isPromotionMove);
+                board.push(move);
             } else {
                 Move move = new Move(previousSquare, currentSquare, previousSquare.getPiece(), capturedPiece);
                 board.push(move);
@@ -210,7 +220,8 @@ public class ChessApp extends Application {
 
             // Kiểm tra nếu sau nước đi tướng vẫn bị chiếu
             if (status.isCheck(whiteTurn)) {
-                System.out.println("Invalid move");
+                String side = whiteTurn ? "White" : "Black";
+                checkmateLabel.setText(side + " is in check");
                 undoMove();
             }
 
@@ -263,6 +274,7 @@ public class ChessApp extends Application {
         if (!board.getHistory().isEmpty()) {
             this.whiteTurn = !this.whiteTurn;
             Move lastMove = board.pop();
+            checkmateLabel.setText("");
 
             //Xử lý nếu hoàn tác nước đi của vua
             if (lastMove instanceof KingMove
@@ -280,7 +292,7 @@ public class ChessApp extends Application {
                 lastMove.getEnd().setPiece(lastMove.getCapturedPiece());
             }
 
-            //Xử lý nếu hoàn tác nước đi en passant
+            //Xử lý nếu hoàn tác nước đi en passant hoặc phong cấp
             if (lastMove instanceof PawnMove) {
                 if (((PawnMove) lastMove).isEnPassantMove()) {
                     if (((PawnMove) lastMove).isLeftEnPassant()) {
@@ -288,6 +300,10 @@ public class ChessApp extends Application {
                     } else {
                         board.getRightSquare(lastMove.getStart()).setPiece(new Pawn(!whiteTurn));
                     }
+                }
+
+                if (((PawnMove) lastMove).isPromotionMove()) {
+                    lastMove.getStart().setPiece(new Pawn(whiteTurn));
                 }
             }
 
@@ -327,6 +343,7 @@ public class ChessApp extends Application {
         status = new GameStatus(board);
 
         // Update the GUI
+        checkmateLabel.setText("");
         board.resetGUI(chessboard);
     }
 
@@ -334,7 +351,7 @@ public class ChessApp extends Application {
         try (PrintWriter writer = new PrintWriter(new FileWriter(saveFilePath))) {
             saveBoardState(writer);
             writer.println(whiteTurn ? "WHITE" : "BLACK");
-            System.out.println("Game saved successfully.");
+            checkmateLabel.setText("Game saved successfully.");
         } catch (IOException e) {
             System.err.println("Error saving the game: " + e.getMessage());
         }
@@ -364,7 +381,7 @@ public class ChessApp extends Application {
             board.resetGUI(chessboard);
             currentSquare = null;
             previousSquare = null;
-            System.out.println("Game loaded successfully.");
+            checkmateLabel.setText("Game loaded successfully.");
         } catch (IOException e) {
             System.err.println("Error loading the game: " + e.getMessage());
         }
@@ -413,4 +430,43 @@ public class ChessApp extends Application {
         loadButton.setOnAction(event -> loadGame());
         return loadButton;
     }
+
+    public void showPromotionDialog() {
+        ChoiceDialog<String> dialog = new ChoiceDialog<>("Queen", "Queen", "Rook", "Bishop", "Knight");
+        dialog.setTitle("Pawn Promotion");
+        dialog.setHeaderText("Choose a piece to promote your pawn to:");
+        dialog.setContentText("Select:");
+
+        // Traditional way to get the response value.
+        dialog.showAndWait().ifPresent(promotionChoice -> {
+            // Handle the selected promotion choice
+            handlePromotion(promotionChoice);
+        });
+    }
+
+    private void handlePromotion(String promotionChoice) {
+        Piece promotedPiece = null;
+
+        switch (promotionChoice) {
+            case "Queen":
+                promotedPiece = new Queen(currentSquare.getPiece().isWhite());
+                break;
+            case "Rook":
+                promotedPiece = new Rook(currentSquare.getPiece().isWhite());
+                break;
+            case "Bishop":
+                promotedPiece = new Bishop(currentSquare.getPiece().isWhite());
+                break;
+            case "Knight":
+                promotedPiece = new Knight(currentSquare.getPiece().isWhite());
+                break;
+        }
+
+        // Set the promoted piece on the current square
+        currentSquare.setPiece(promotedPiece);
+
+        // Reset the GUI
+        board.resetGUI(chessboard);
+    }
+
 }

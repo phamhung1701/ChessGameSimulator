@@ -9,7 +9,7 @@ public class PawnMove extends Move {
     private boolean isEnPassantMove;
     private boolean isLeftEnPassant;
     private boolean isFirst2Move;
-
+    private boolean isPromotionMove;
     public PawnMove(Square start, Square end, Piece movedPiece, Piece capturedPiece) {
         super(start, end, movedPiece, capturedPiece);
     }
@@ -51,5 +51,13 @@ public class PawnMove extends Move {
 
     public void setEnPassantPossible(boolean enPassantPossible) {
         this.enPassantPossible = enPassantPossible;
+    }
+
+    public boolean isPromotionMove() {
+        return isPromotionMove;
+    }
+
+    public void setPromotionMove(boolean promotionMove) {
+        isPromotionMove = promotionMove;
     }
 }

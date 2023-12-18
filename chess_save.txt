@@ -1,0 +1,9 @@
+rp----PR
+np--P--N
+bp----PB
+qp----PQ
+kp----PK
+bp----PB
+np----PN
+rp----PR
+BLACK
