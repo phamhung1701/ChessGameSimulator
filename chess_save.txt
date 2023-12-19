@@ -1,8 +1,8 @@
 rp----PR
-np--P--N
+np----PN
 bp----PB
 qp----PQ
-kp----PK
+kp--P--K
 bp----PB
 np----PN
 rp----PR

@@ -41,11 +41,11 @@ public class ChessApp extends Application {
         chessboard.setOnMouseClicked(this::handleMouseClick);
         checkmateLabel.setStyle("-fx-font-size: 18; -fx-font-weight: bold;");
 
-        // Create the save and load buttons
+        // Tạo nút tải và lưu game
         Button saveButton = createSaveGameButton();
         Button loadButton = createLoadGameButton();
 
-        // Create the undo button
+        // Tạo nút hoàn tác
         Button undoButton = new Button("Undo");
         undoButton.setOnAction(event -> undoMove());
 
@@ -277,8 +277,7 @@ public class ChessApp extends Application {
             checkmateLabel.setText("");
 
             //Xử lý nếu hoàn tác nước đi của vua
-            if (lastMove instanceof KingMove
-                    && lastMove.getEnd().getPiece() instanceof King) {
+            if (lastMove.getEnd().getPiece() instanceof King) {
                 ((King) lastMove.getEnd().getPiece()).undo();
             }
 
