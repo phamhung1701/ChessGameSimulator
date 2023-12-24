@@ -15,6 +15,8 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 import java.io.*;
+import java.util.HashMap;
+import java.util.Map;
 
 
 public class ChessApp extends Application {
@@ -93,6 +95,7 @@ public class ChessApp extends Application {
 
     // Xử lý các bước đi
     public void handleMove(int row, int column) {
+        long startTime = System.currentTimeMillis();
         //Xác định ô được chọn và ô đã chọn trước đó
         previousSquare = currentSquare;
         currentSquare = this.board.getSquare(row, column);
@@ -241,6 +244,9 @@ public class ChessApp extends Application {
             // Đặt lại giao diện cho bàn cờ
             board.resetGUI(chessboard);
         }
+        long endTime = System.currentTimeMillis();
+        long executionTime = endTime - startTime;
+        System.out.println("Thời gian thực thi của nước đi: " + executionTime + " milliseconds");
     }
 
 
@@ -443,23 +449,17 @@ public class ChessApp extends Application {
         });
     }
 
-    private void handlePromotion(String promotionChoice) {
-        Piece promotedPiece = null;
+    private static final Map<String, PieceFactory> PROMOTION_MAP = new HashMap<>();
 
-        switch (promotionChoice) {
-            case "Queen":
-                promotedPiece = new Queen(currentSquare.getPiece().isWhite());
-                break;
-            case "Rook":
-                promotedPiece = new Rook(currentSquare.getPiece().isWhite());
-                break;
-            case "Bishop":
-                promotedPiece = new Bishop(currentSquare.getPiece().isWhite());
-                break;
-            case "Knight":
-                promotedPiece = new Knight(currentSquare.getPiece().isWhite());
-                break;
-        }
+    static {
+        PROMOTION_MAP.put("Queen", Queen::new);
+        PROMOTION_MAP.put("Rook", Rook::new);
+        PROMOTION_MAP.put("Knight", Knight::new);
+        PROMOTION_MAP.put("Bishop", Bishop::new);
+    }
+
+    private void handlePromotion(String promotionChoice) {
+        Piece promotedPiece = PROMOTION_MAP.get(promotionChoice).create(whiteTurn);
 
         // Set the promoted piece on the current square
         currentSquare.setPiece(promotedPiece);

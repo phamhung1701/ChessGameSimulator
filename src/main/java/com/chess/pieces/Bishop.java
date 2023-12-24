@@ -63,4 +63,9 @@ public class Bishop extends Piece {
 
         return false;
     }
+
+    @Override
+    public Piece create(boolean isWhite) {
+        return new Bishop(isWhite);
+    }
 }

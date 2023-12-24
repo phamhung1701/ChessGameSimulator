@@ -139,4 +139,9 @@ public class Pawn extends Piece {
     public void setMovedFirstTwo(boolean movedFirstTwo) {
         this.movedFirstTwo = movedFirstTwo;
     }
+
+    @Override
+    public Piece create(boolean isWhite) {
+        return new Pawn(isWhite);
+    }
 }

@@ -1,7 +1,6 @@
 package com.chess;
 
-import com.chess.pieces.King;
-import com.chess.pieces.Piece;
+import com.chess.pieces.*;
 
 public class GameStatus {
     private final Board board;
@@ -41,7 +40,6 @@ public class GameStatus {
     }
 
     public boolean isCheckmate(boolean isWhite) {
-        int totalValidMove = 0;
         for (int i = 0; i < 8; i++) {
             for (int j = 0; j < 8; j++) {
                 for (int k = 0; k < 8; k++) {
@@ -52,13 +50,13 @@ public class GameStatus {
                                 && start.getPiece().isWhite() == isWhite
                                 && start.getPiece().canMove(board, start, end)
                                 && isMoveValidWithoutCheck(start, end, isWhite)) {
-                            totalValidMove++;
+                            return false;
                         }
                     }
                 }
             }
         }
-        return totalValidMove == 0;
+        return true;
     }
 
     // Kiểm tra nếu nước đi phù hợp để không bị chiếu

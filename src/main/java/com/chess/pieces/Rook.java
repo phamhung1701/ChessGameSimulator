@@ -95,4 +95,9 @@ public class Rook extends Piece {
     public char getSymbol() {
         return 'R';
     }
+
+    @Override
+    public Piece create(boolean isWhite) {
+        return new Rook(isWhite);
+    }
 }

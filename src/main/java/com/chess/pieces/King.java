@@ -97,4 +97,9 @@ public class King extends Piece {
     public void undo() {
         timesMoved--;
     }
+
+    @Override
+    public Piece create(boolean isWhite) {
+        return new King(isWhite);
+    }
 }

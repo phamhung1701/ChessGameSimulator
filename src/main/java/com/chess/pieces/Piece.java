@@ -4,7 +4,7 @@ import com.chess.Board;
 import com.chess.Square;
 import javafx.scene.image.ImageView;
 
-public abstract class Piece {
+public abstract class Piece implements PieceFactory {
     //Lớp trừu tượng biểu diễn một quân cờ
     private boolean isWhite; // Kiểm tra có là quân trắng hay không
 

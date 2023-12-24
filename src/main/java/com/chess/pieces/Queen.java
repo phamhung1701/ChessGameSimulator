@@ -98,4 +98,9 @@ public class Queen extends Piece {
     public char getSymbol() {
         return 'Q';
     }
+
+    @Override
+    public Piece create(boolean isWhite) {
+        return new Queen(isWhite);
+    }
 }

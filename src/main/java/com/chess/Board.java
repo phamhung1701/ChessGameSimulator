@@ -8,6 +8,8 @@ import javafx.geometry.VPos;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Stack;
 
 public class Board {
@@ -17,6 +19,7 @@ public class Board {
 
     // Dùng Stack để lưu trữ các nước đi
     Stack<Move> history = new Stack<>();
+
     // Hàm dựng
     public Board() {
         initializeChessboard();

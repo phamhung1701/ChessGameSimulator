@@ -26,7 +26,6 @@ public class Square {
     // Di chuyển quân cờ ở ô hiện tại đến ô destination và trả về quân cờ đã bị ăn
     public Piece movePieceTo(Square destination) {
         Piece capturedPiece = null;
-
         if (destination.getPiece() != null) {
             capturedPiece = destination.getPiece();
         }
